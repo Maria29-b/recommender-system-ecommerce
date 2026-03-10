@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Recommandations</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav>
+        <a href="/"> Accueil</a>
+        <a href="/recommend" class="active"> Recommandations</a>
+        <a href="/stats"> Stats</a>
+        <a href="/docs"> API Docs</a>
+    </nav>
+
+    <div class="container">
+        <h1>🔍 Tester les Recommandations</h1>
+
+        <!-- Formulaire de recherche -->
+        <div class="card search-card">
+            <h2>Entrer un User ID</h2>
+            <div class="search-box">
+                <input
+                    type="text"
+                    id="userId"
+                    placeholder="Ex: AG73BVBKUOH22USSFJA5ZWL7AKXA"
+                    class="search-input"
+                />
+                <button onclick="getRecommendations()" class="btn-primary">
+                     Recommander
+                </button>
+            </div>
+
+            <!-- Users de test -->
+            <div class="quick-test">
+                <p> Tester rapidement :</p>
+                <button onclick="testUser('AG73BVBKUOH22USSFJA5ZWL7AKXA')"
+                        class="btn-test">
+                    User connu
+                </button>
+                <button onclick="testUser('NOUVEAU_USER_INCONNU_123')"
+                        class="btn-test btn-cold">
+                    Nouvel user (Cold Start)
+                </button>
+            </div>
+        </div>
+
+        <!-- Résultats -->
+        <div id="results" style="display:none">
+            <div class="card result-header">
+                <div class="result-meta">
+                    <span id="strategyBadge" class="badge"></span>
+                    <span id="latencyBadge" class="badge badge-green"></span>
+                    <span id="nbRecsBadge" class="badge badge-blue"></span>
+                </div>
+                <p id="userId-display"></p>
+            </div>
+
+            <div class="products-grid" id="productsGrid"></div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" style="display:none" class="loading">
+            ⏳ Génération des recommandations...
+        </div>
+
+        <!-- Erreur -->
+        <div id="error" style="display:none" class="error-card"></div>
+    </div>
+
+    <script>
+        async function getRecommendations() {
+            const userId = document.getElementById('userId').value.trim();
+            if (!userId) {
+                alert('Veuillez entrer un User ID');
+                return;
+            }
+
+            // Afficher loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('error').style.display   = 'none';
+
+            try {
+                const response = await fetch(`/api/recommend/${userId}?n=10`);
+                const data     = await response.json();
+
+                // Badges
+                const strategyBadge = document.getElementById('strategyBadge');
+                if (data.strategy === 'collaborative_filtering') {
+                    strategyBadge.textContent  = ' Collaborative Filtering';
+                    strategyBadge.className    = 'badge badge-blue';
+                } else {
+                    strategyBadge.textContent  = ' Cold Start — Produits populaires';
+                    strategyBadge.className    = 'badge badge-orange';
+                }
+
+                const latency = data.latency_ms < 1
+                    ? `⚡ ${data.latency_ms} ms (< 1ms !)`
+                    : `⚡ ${data.latency_ms} ms`;
+                document.getElementById('latencyBadge').textContent = latency;
+                document.getElementById('nbRecsBadge').textContent  =
+                    ` ${data.nb_recommendations} produits`;
+                document.getElementById('userId-display').textContent =
+                    ` ${data.user_id}`;
+
+                // Produits
+                const grid = document.getElementById('productsGrid');
+                grid.innerHTML = '';
+                data.recommendations.forEach((productId, index) => {
+                    grid.innerHTML += `
+                        <div class="product-card">
+                            <div class="product-rank">#${index + 1}</div>
+                            <div class="product-icon">📦</div>
+                            <div class="product-id">${productId}</div>
+                            <a href="https://amazon.com/dp/${productId}"
+                               target="_blank" class="amazon-link">
+                               Voir sur Amazon →
+                            </a>
+                        </div>`;
+                });
+
+                document.getElementById('loading').style.display  = 'none';
+                document.getElementById('results').style.display  = 'block';
+
+            } catch (err) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display   = 'block';
+                document.getElementById('error').textContent     =
+                    ` Erreur : ${err.message}`;
+            }
+        }
+
+        function testUser(userId) {
+            document.getElementById('userId').value = userId;
+            getRecommendations();
+        }
+
+        // Lancer avec Enter
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('userId')
+                .addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') getRecommendations();
+                });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>🛒 Recommendation Engine</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .hero {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            border-radius: 12px;
+            padding: 50px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .hero h1 { font-size: 36px; margin-bottom: 10px; color: white; }
+        .hero p  { font-size: 16px; opacity: 0.85; margin-bottom: 25px; }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        }
+        .metric-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 5px;
+        }
+        .metric-label {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .models-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .model-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            border-top: 4px solid #3498db;
+        }
+        .model-card.best { border-top-color: #27ae60; }
+        .model-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .model-metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #ecf0f1;
+            font-size: 14px;
+        }
+        .model-metric:last-child { border-bottom: none; }
+        .model-metric span:last-child { font-weight: bold; color: #2c3e50; }
+        .best-badge {
+            background: #eafaf1;
+            color: #27ae60;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        .nav-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .nav-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            text-decoration: none;
+            color: #2c3e50;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: block;
+        }
+        .nav-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+            color: #3498db;
+        }
+        .nav-card .icon { font-size: 36px; margin-bottom: 12px; }
+        .nav-card h3    { font-size: 16px; margin-bottom: 8px; }
+        .nav-card p     { font-size: 13px; color: #7f8c8d; }
+
+        .btn-hero {
+            background: white;
+            color: #3498db;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+            margin: 5px;
+        }
+        .btn-hero:hover {
+            background: #3498db;
+            color: white;
+        }
+        .btn-hero-outline {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+            padding: 14px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+            margin: 5px;
+        }
+        .btn-hero-outline:hover {
+            background: white;
+            color: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="active"> Accueil</a>
+        <a href="/recommend"> Recommandations</a>
+        <a href="/stats"> Stats</a>
+        <a href="/docs"> API Docs</a>
+    </nav>
+
+    <div class="container">
+
+        <!-- Hero -->
+        <div class="hero">
+            <h1>🛒 Moteur de Recommandation</h1>
+            <p>Système de recommandation e-commerce basé sur ALS et TensorFlow</p>
+            <p>Dataset Amazon Beauty · {{ nb_users|int }} utilisateurs chargés</p>
+            <br>
+            <a href="/recommend" class="btn-hero">🚀 Tester les recommandations</a>
+            <a href="/docs"      class="btn-hero-outline">📖 Documentation API</a>
+        </div>
+
+        <!-- Métriques dataset -->
+        <h2 style="margin-bottom:15px">📊 Dataset Amazon Beauty</h2>
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-number">631,986</div>
+                <div class="metric-label">👤 Utilisateurs</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-number">112,565</div>
+                <div class="metric-label">📦 Produits</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-number">701,528</div>
+                <div class="metric-label">📊 Interactions</div>
+            </div>
+        </div>
+
+        <!-- Modèles -->
+        <h2 style="margin-bottom:15px"> Performance des Modèles</h2>
+        <div class="models-grid">
+
+            <div class="model-card">
+                <div class="model-name">
+                     ALS — Collaborative Filtering
+                </div>
+                <div class="model-metric">
+                    <span>RMSE</span>
+                    <span>2.5304</span>
+                </div>
+                <div class="model-metric">
+                    <span>Precision@10</span>
+                    <span>0.4%</span>
+                </div>
+                <div class="model-metric">
+                    <span>Rank</span>
+                    <span>100</span>
+                </div>
+                <div class="model-metric">
+                    <span>RegParam</span>
+                    <span>0.05</span>
+                </div>
+            </div>
+
+            <div class="model-card best">
+                <div class="model-name">
+                     TensorFlow Embeddings
+                    <span class="best-badge">✅ Meilleur</span>
+                </div>
+                <div class="model-metric">
+                    <span>RMSE</span>
+                    <span>1.6519</span>
+                </div>
+                <div class="model-metric">
+                    <span>Embedding dim</span>
+                    <span>32</span>
+                </div>
+                <div class="model-metric">
+                    <span>Epochs</span>
+                    <span>5</span>
+                </div>
+                <div class="model-metric">
+                    <span>Architecture</span>
+                    <span>Embedding + Dense</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation cards -->
+        <h2 style="margin-bottom:15px">🔗 Explorer</h2>
+        <div class="nav-cards">
+            <a href="/recommend" class="nav-card">
+                <div class="icon">🔍</div>
+                <h3>Recommandations</h3>
+                <p>Tester les recommandations personnalisées par user ID</p>
+            </a>
+            <a href="/stats" class="nav-card">
+                <div class="icon">📊</div>
+                <h3>Statistiques</h3>
+                <p>Métriques complètes des modèles et du dataset</p>
+            </a>
+            <a href="/docs" class="nav-card">
+                <div class="icon">📖</div>
+                <h3>API Docs</h3>
+                <p>Documentation interactive Swagger OpenAPI</p>
+            </a>
+        </div>
+
+    </div>
+</body>
+</html>

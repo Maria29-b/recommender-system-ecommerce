@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>📊 Statistiques</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .stats-hero {
+            background: linear-gradient(135deg, #2c3e50, #27ae60);
+            color: white;
+            border-radius: 12px;
+            padding: 35px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .stats-hero h1 { font-size: 30px; color: white; margin-bottom: 8px; }
+        .stats-hero p  { opacity: 0.85; font-size: 15px; }
+
+        /* Grilles */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        /* Metric cards */
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        }
+        .metric-number {
+            font-size: 30px;
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 5px;
+        }
+        .metric-number.green  { color: #27ae60; }
+        .metric-number.orange { color: #e67e22; }
+        .metric-label {
+            font-size: 13px;
+            color: #7f8c8d;
+        }
+
+        /* Model cards */
+        .model-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            border-top: 4px solid #3498db;
+        }
+        .model-card.best { border-top-color: #27ae60; }
+
+        .model-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .model-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .best-badge {
+            background: #eafaf1;
+            color: #27ae60;
+            padding: 4px 12px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .model-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f4f8;
+            font-size: 14px;
+        }
+        .model-row:last-child { border-bottom: none; }
+        .model-row-label { color: #7f8c8d; }
+        .model-row-value {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .model-row-value.good  { color: #27ae60; }
+        .model-row-value.bad   { color: #e74c3c; }
+
+        /* RMSE Bar */
+        .rmse-comparison {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+        .rmse-comparison h2 { margin-bottom: 20px; }
+
+        .bar-container {
+            margin: 15px 0;
+        }
+        .bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+        .bar-label span:first-child { font-weight: bold; color: #2c3e50; }
+        .bar-label span:last-child  { color: #7f8c8d; }
+
+        .bar-track {
+            background: #f0f4f8;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+        }
+        .bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1s ease;
+        }
+        .bar-fill.als { background: #e74c3c; width: 85%; }
+        .bar-fill.tf  { background: #27ae60; width: 55%; }
+
+        /* Dataset info */
+        .dataset-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+        .dataset-card h2 { margin-bottom: 20px; }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f4f8;
+            font-size: 14px;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: #7f8c8d; }
+        .info-value { font-weight: bold; color: #2c3e50; }
+
+        /* Amélioration badge */
+        .improvement {
+            background: #eafaf1;
+            border: 1px solid #27ae60;
+            border-radius: 10px;
+            padding: 15px 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .improvement-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #27ae60;
+        }
+        .improvement-label {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        /* Section title */
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #3498db;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/"> Accueil</a>
+        <a href="/recommend"> Recommandations</a>
+        <a href="/stats" class="active"> Stats</a>
+        <a href="/docs"> API Docs</a>
+    </nav>
+
+    <div class="container">
+
+        <!-- Hero -->
+        <div class="stats-hero">
+            <h1>📊 Statistiques du Système</h1>
+            <p>Performance des modèles et métriques du dataset Amazon Beauty</p>
+        </div>
+
+        <!-- Dataset metrics -->
+        <p class="section-title"> Dataset Amazon Beauty</p>
+        <div class="grid-3">
+            <div class="metric-card">
+                <div class="metric-number">631,986</div>
+                <div class="metric-label">👤 Utilisateurs</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-number">112,565</div>
+                <div class="metric-label">📦 Produits</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-number">701,528</div>
+                <div class="metric-label">📊 Interactions</div>
+            </div>
+        </div>
+
+        <!-- Dataset details -->
+        <div class="dataset-card">
+            <h2>ℹ️ Détails du Dataset</h2>
+            <div class="info-row">
+                <span class="info-label">📂 Source</span>
+                <span class="info-value">Amazon Reviews 2023 — All Beauty</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">📅 Période</span>
+                <span class="info-value">Novembre 2000 → Septembre 2023</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">✂️ Split date</span>
+                <span class="info-value">2021-01-01</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">🚂 Train</span>
+                <span class="info-value">500,645 interactions (71%)</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">🧪 Test</span>
+                <span class="info-value">200,883 interactions (29%)</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">🔢 Densité matrice</span>
+                <span class="info-value">0.001% — matrice ultra creuse</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">⭐ Biais ratings</span>
+                <span class="info-value">61% des ratings sont 5 étoiles</span>
+            </div>
+        </div>
+
+        <!-- Amélioration globale -->
+        <p class="section-title"> Résultat Clé</p>
+        <div class="improvement">
+            <div class="improvement-number">34.7%</div>
+            <div class="improvement-label">
+                Amélioration RMSE — TensorFlow bat ALS
+            </div>
+        </div>
+
+        <!-- RMSE Comparison bar -->
+        <div class="rmse-comparison">
+            <h2>📉 Comparaison RMSE</h2>
+            <p style="font-size:13px; color:#7f8c8d; margin-bottom:20px">
+                RMSE = erreur moyenne de prédiction (plus bas = meilleur)
+            </p>
+
+            <div class="bar-container">
+                <div class="bar-label">
+                    <span>🤖 ALS</span>
+                    <span>RMSE = 2.5304</span>
+                </div>
+                <div class="bar-track">
+                    <div class="bar-fill als"></div>
+                </div>
+            </div>
+
+            <div class="bar-container">
+                <div class="bar-label">
+                    <span>🧠 TensorFlow ✅</span>
+                    <span>RMSE = 1.6519</span>
+                </div>
+                <div class="bar-track">
+                    <div class="bar-fill tf"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model details -->
+        <p class="section-title">🤖 Détails des Modèles</p>
+        <div class="grid-2">
+
+            <!-- ALS -->
+            <div class="model-card">
+                <div class="model-header">
+                    <div class="model-name">🤖 ALS</div>
+                </div>
+                <div class="model-row">
+                    <span class="model-row-label">RMSE</span>
+                    <span class="model-row-value bad">2.5304</span>
+                </div>
+                <div class="model-row">
+                    <span class="model-row-label">Precision@10</span>
+                    <span class="model-row-value">0.4%</span>
+                </div>
+                <div class="model-row">
+                    <span class="model-row-label">Rank</span>
+                    <span class="model-row-value">100</span>
+                </div>
+                <div class="model-row">
+                    <span class="model-row-label">RegParam</span>
+                    <span class="model-row-value">0.05</span>
+                </div>
+                <div class="model-row">
+                    <span class="model-row-label">MaxIter</span>
+                    <span class="model-row-value">15</span>
+                </div>
+                <div class="model-row">
+                    <span class="model-row-label">Users couverts</span>
+                    <span class="model-row-value">457,324</span>
+                </div>
+                <div class="model-row">
+                    <span class="model-row-label">Items couverts</span>
+                    <span class="model-row-value">80,187</span>
+                </div>
+            </div>
+
+            <!-- TensorFlow -->
+            <div class="model-card best">
+                <div class="model-header">
+                    <div class="model-name">🧠 TensorFlow</div>
+                    <span class="best-badge">✅ Meilleur</span>
+                </div>
+                <div class="model-row">
+                    <span class="model-row-label">RMSE</span>
+                    <span class="model-row-value good">1.6519</span>
+                </div>
+                <div class="model-row">
+                    <span class="model-row-label">Amélioration vs ALS</span>
+                    <span class="model-row-value good">-34.7%</span>
+                </div>
+                <div class="model-row">
+                    <span class="model-row-label">Embedding dim</span>
+                    <span class="model-row-value">32</span>
+                </div>
+                <div class="model-row">
+                    <span class="model-row-label">Epochs</span>
+                    <span class="model-row-value">5</span>
+                </div>
+                <div class="model-row">
+                    <span class="model-row-label">Batch size</span>
+                    <span class="model-row-value">512</span>
+                </div>
+                <div class="model-row">
+                    <span class="model-row-label">Architecture</span>
+                    <span class="model-row-value">Embedding + Dense</span>
+                </div>
+                <div class="model-row">
+                    <span class="model-row-label">Optimizer</span>
+                    <span class="model-row-value">Adam</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cold Start -->
+        <div class="dataset-card">
+            <h2>❄️ Stratégie Cold Start</h2>
+            <div class="info-row">
+                <span class="info-label">Utilisateur connu</span>
+                <span class="info-value">🤖 Collaborative Filtering (ALS)</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Nouvel utilisateur</span>
+                <span class="info-value">⭐ Produits populaires (fallback)</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Latence moyenne</span>
+                <span class="info-value good">< 5ms ⚡</span>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
